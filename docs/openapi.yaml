@@ -1,0 +1,38 @@
+openapi: 3.0.0
+info:
+  title: BHVR API
+  version: 0.5.1
+paths:
+  /:
+    get:
+      summary: Root endpoint
+      responses:
+        '200':
+          description: Returns greeting string
+          content:
+            text/plain:
+              schema:
+                type: string
+  /hello:
+    get:
+      summary: Get API response
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+components:
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        success:
+          type: boolean
+          const: true
+      required:
+        - message
+        - success
