@@ -1,264 +1,55 @@
-# bhvr 🦫
+# System Identity & Onboarding Blueprint
 
-![cover](https://cdn.stevedylan.dev/ipfs/bafybeievx27ar5qfqyqyud7kemnb5n2p4rzt2matogi6qttwkpxonqhra4)
+## Executive Summary
+The Interactive Technical Passport is a full-stack, type-safe security information and event management (SIEM) log intelligence system. It provides real-time anomaly detection for sensitive data leaks (e.g., credit card patterns) within logs. The system utilizes a monorepo architecture, leveraging **Bun** for orchestration, **Hono** for high-performance API services, **Drizzle** for database interactions, and **React** with **TanStack Query** for a responsive, data-driven frontend. Its core value proposition is maintaining end-to-end type safety between the server API surface and the client interface, ensuring robust data handling for security analysts.
 
-A full-stack TypeScript monorepo starter with shared types, using Bun, Hono, Vite, and React.
+## Primary Entrypoints
+*   [[server/src/index.ts]]: The primary API entrypoint. Defines the Hono application, middleware stack (CORS, CSRF, logging), and core business logic for log scanning.
+*   [[client/src/routes/index.tsx]]: The main frontend route. Serves as the primary interface for triggering log scans and displaying findings via TanStack Query.
+*   [[server/src/db/index.ts]]: The database access layer. Configures the Drizzle ORM instance and schema bindings used across the backend.
+*   [[client/src/routeTree.gen.ts]]: The auto-generated routing manifest. Essential for understanding the application's navigation structure and component tree.
+*   [[shared/src/types/index.ts]]: The central source of truth for shared data contracts (e.g., `LeakFinding`, `ScanResult`), ensuring consistency between the server and the client.
 
-## Why bhvr?
+## Knowledge Holders & Ownership Risks
+*   **Engineering Team**: The codebase is maintained as a collective monorepo.
+*   **Ownership Risks**: High bus-factor risk is associated with the configuration-heavy setup (e.g., [[turbo.json]], [[biome.json]], and the `bun` workspace orchestration). Changes to these files can disrupt the entire build pipeline. The reliance on auto-generated files like [[client/src/routeTree.gen.ts]] requires strict adherence to the defined build lifecycle to avoid desynchronization.
 
-While there are plenty of existing app building stacks out there, many of them are either bloated, outdated, or have too much of a vendor lock-in. bhvr is built with the opinion that you should be able to deploy your client or server in any environment while also keeping type safety.
+## Quick Start, Setup & Verification
+### Prerequisites
+*   [Bun](https://bun.sh) runtime (v1.2.4 or higher).
+*   Access to the repository.
 
-## Features
+### Setup Instructions
+1.  **Install Dependencies**: Navigate to the project root and run:
+    ```bash
+    bun install
+    ```
+2.  **Environment Configuration**: Ensure required environment variables are defined. The server requires access to a database (via `DATABASE_URL`) and an Axiom token (via `AXIOM_TOKEN`). Refer to [[server/src/env.ts]] for the schema.
+3.  **Database Migration**: Initialize the local database schema:
+    ```bash
+    bun run db:migrate
+    ```
+4.  **Launch Development Environment**: Start the monorepo services:
+    ```bash
+    bun run dev
+    ```
 
-- **Full-Stack TypeScript**: End-to-end type safety between client and server
-- **Shared Types**: Common type definitions shared between client and server
-- **Monorepo Structure**: Organized as a workspaces-based monorepo with Turbo for build orchestration
-- **Modern Stack**:
-  - [Bun](https://bun.sh) as the JavaScript runtime and package manager
-  - [Hono](https://hono.dev) as the backend framework
-  - [Vite](https://vitejs.dev) for frontend bundling
-  - [React](https://react.dev) for the frontend UI
-  - [Turbo](https://turbo.build) for monorepo build orchestration and caching
-
-## Project Structure
-
-```
-.
-├── client/               # React frontend
-├── server/               # Hono backend
-├── shared/               # Shared TypeScript definitions
-│   └── src/types/        # Type definitions used by both client and server
-├── package.json          # Root package.json with workspaces
-└── turbo.json            # Turbo configuration for build orchestration
-```
-
-### Server
-
-bhvr uses Hono as a backend API for its simplicity and massive ecosystem of plugins. If you have ever used Express then it might feel familiar. Declaring routes and returning data is easy.
-
-```
-server
-├── bun.lock
-├── package.json
-├── README.md
-├── src
-│   └── index.ts
-└── tsconfig.json
-```
-
-```typescript src/index.ts
-import { Hono } from 'hono'
-import { cors } from 'hono/cors'
-import type { ApiResponse } from 'shared'
-
-const app = new Hono()
-
-app.use(cors())
-
-app.get('/', (c) => {
-  return c.text('Hello Hono!')
-})
-
-app.get('/hello', async (c) => {
-
-  const data: ApiResponse = {
-    message: "Hello BHVR!",
-    success: true
-  }
-
-  return c.json(data, { status: 200 })
-})
-
-export default app
-```
-
-If you wanted to add a database to Hono you can do so with a multitude of Typescript libraries like [Supabase](https://supabase.com), or ORMs like [Drizzle](https://orm.drizzle.team/docs/get-started) or [Prisma](https://www.prisma.io/orm)
-
-### Client
-
-bhvr uses Vite + React Typescript template, which means you can build your frontend just as you would with any other React app. This makes it flexible to add UI components like [shadcn/ui](https://ui.shadcn.com) or routing using [React Router](https://reactrouter.com/start/declarative/installation).
-
-```
-client
-├── eslint.config.js
-├── index.html
-├── package.json
-├── public
-│   └── vite.svg
-├── README.md
-├── src
-│   ├── App.css
-│   ├── App.tsx
-│   ├── assets
-│   ├── index.css
-│   ├── main.tsx
-│   └── vite-env.d.ts
-├── tsconfig.app.json
-├── tsconfig.json
-├── tsconfig.node.json
-└── vite.config.ts
-```
-
-```typescript src/App.tsx
-import { useState } from 'react'
-import beaver from './assets/beaver.svg'
-import { ApiResponse } from 'shared'
-import './App.css'
-
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000"
-
-function App() {
-  const [data, setData] = useState<ApiResponse | undefined>()
-
-  async function sendRequest() {
-    try {
-      const req = await fetch(`${SERVER_URL}/hello`)
-      const res: ApiResponse = await req.json()
-      setData(res)
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
-  return (
-    <>
-      <div>
-        <a href="https://github.com/stevedylandev/bhvr" target="_blank">
-          <img src={beaver} className="logo" alt="beaver logo" />
-        </a>
-      </div>
-      <h1>bhvr</h1>
-      <h2>Bun + Hono + Vite + React</h2>
-      <p>A typesafe fullstack monorepo</p>
-      <div className="card">
-        <button onClick={sendRequest}>
-          Call API
-        </button>
-        {data && (
-          <pre className='response'>
-            <code>
-            Message: {data.message} <br />
-            Success: {data.success.toString()}
-            </code>
-          </pre>
-        )}
-      </div>
-      <p className="read-the-docs">
-        Click the beaver to learn more
-      </p>
-    </>
-  )
-}
-
-export default App
-```
-
-### Shared
-
-The Shared package is used for anything you want to share between the Server and Client. This could be types or libraries that you use in both environments.
-
-```
-shared
-├── package.json
-├── src
-│   ├── index.ts
-│   └── types
-│       └── index.ts
-└── tsconfig.json
-```
-
-Inside the `src/index.ts` we export any of our code from the folders so it's usable in other parts of the monorepo
-
-```typescript
-export * from "./types"
-```
-
-By running `bun run dev` or `bun run build` it will compile and export the packages from `shared` so it can be used in either `client` or `server`
-
-```typescript
-import { ApiResponse } from 'shared'
-```
-
-## Getting Started
-
-### Quick Start
-
-You can start a new bhvr project using the [CLI](https://github.com/stevedylandev/create-bhvr)
-
+### Smoke Test / Verification
+Verify the server is operational by pinging the health endpoint:
 ```bash
-bun create bhvr
+curl http://localhost:3000/api/ping
 ```
+> [!NOTE]
+> The expected response is `{"status":"ok","message":"pong"}`.
 
-### Installation
+## Operating Model & Next Steps
+The system operates as a workspace-based monorepo orchestrated by **Turbo**. The server runtime utilizes Hono's `fetch` API, enabling deployment in edge or Node-compatible environments. The frontend relies on Vite's HMR and TanStack Router's file-based routing.
 
-```bash
-# Install dependencies for all workspaces
-bun install
-```
+### Next Steps for Engineers
+*   Review [[server/src/modules/scan/scan.service.ts]] to understand the core detection logic.
+*   Consult [[client/src/shared/lib/utils.ts]] for standard UI patterns and Tailwind configurations.
+*   Examine [[server/src/db/schema.ts]] for the current data model definitions before performing schema modifications.
+*   Read [[client/README.md]] and [[server/README.md]] for environment-specific deployment details.
 
-### Development
-
-```bash
-# Run all workspaces in development mode with Turbo
-bun run dev
-
-# Or run individual workspaces directly
-bun run dev:client    # Run the Vite dev server for React
-bun run dev:server    # Run the Hono backend
-```
-
-### Building
-
-```bash
-# Build all workspaces with Turbo
-bun run build
-
-# Or build individual workspaces directly
-bun run build:client  # Build the React frontend
-bun run build:server  # Build the Hono backend
-```
-
-### Additional Commands
-
-```bash
-# Lint all workspaces
-bun run lint
-
-# Type check all workspaces
-bun run type-check
-
-# Run tests across all workspaces
-bun run test
-```
-
-### Deployment
-
-Deplying each piece is very versatile and can be done numerous ways, and exploration into automating these will happen at a later date. Here are some references in the meantime.
-
-**Client**
-- [Orbiter](https://orbiter.host)
-- [GitHub Pages](https://vite.dev/guide/static-deploy.html#github-pages)
-- [Netlify](https://vite.dev/guide/static-deploy.html#netlify)
-- [Cloudflare Pages](https://vite.dev/guide/static-deploy.html#cloudflare-pages)
-
-**Server**
-- [Cloudflare Worker](https://gist.github.com/stevedylandev/4aa1fc569bcba46b7169193c0498d0b3)
-- [Bun](https://hono.dev/docs/getting-started/bun)
-- [Node.js](https://hono.dev/docs/getting-started/nodejs)
-
-## Type Sharing
-
-Types are automatically shared between the client and server thanks to the shared package and TypeScript path aliases. You can import them in your code using:
-
-```typescript
-import { ApiResponse } from 'shared/types';
-```
-
-## Learn More
-
-- [Bun Documentation](https://bun.sh/docs)
-- [Vite Documentation](https://vitejs.dev/guide/)
-- [React Documentation](https://react.dev/learn)
-- [Hono Documentation](https://hono.dev/docs)
-- [Turbo Documentation](https://turbo.build/docs)
-- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
+> [!WARNING]
+> Do not manually edit [[client/src/routeTree.gen.ts]]. Use the TanStack Router CLI or standard build tasks to regenerate this file.
