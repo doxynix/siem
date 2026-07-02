@@ -1,46 +1,59 @@
 {
-	"name": "new-app",
-	"version": "0.5.1",
-	"description": "A monorepo template built with Bun, Hono, Vite, and React",
-	"author": "Steve Simkins",
-	"license": "MIT",
-	"homepage": "https://github.com/stevedylandev/bhvr",
-	"packageManager": "bun@1.2.4",
-	"workspaces": [
-		"./server",
-		"./client",
-		"./shared"
-	],
-	"scripts": {
-		"dev": "turbo dev",
-		"dev:client": "turbo dev --filter=client",
-		"dev:server": "turbo dev --filter=server",
-		"build": "turbo build",
-		"build:client": "turbo build --filter=client",
-		"build:server": "turbo build --filter=server",
-		"lint": "biome lint .",
-		"type-check": "turbo type-check",
-		"test": "turbo test",
-		"postinstall": "turbo build --filter=shared --filter=server",
-		"format": "biome format . --write"
-	},
-	"keywords": [
-		"bun",
-		"hono",
-		"react",
-		"vite",
-		"monorepo",
-		"turbo"
-	],
-	"devDependencies": {
-		"@biomejs/biome": "^2.4.16",
-		"bun-types": "latest",
-		"turbo": "^2.5.5"
-	},
-	"peerDependencies": {
-		"typescript": "^5.7.3"
-	},
-	"dependencies": {
-		"hono": "^4.12.25"
-	}
+  "name": "@doxynix/siem",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Log intelligence & anomaly detection system for Doxynix",
+  "author": "Doxynix",
+  "license": "AGPL-3.0-only",
+  "homepage": "https://github.com/doxynix/siem",
+  "packageManager": "bun@1.2.4",
+  "workspaces": [
+    "./server",
+    "./client",
+    "./shared"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "dev:client": "turbo dev --filter=@doxynix/siem-client",
+    "dev:server": "turbo dev --filter=@doxynix/siem-server",
+    "db:generate": "bun --filter=@doxynix/siem-server db:generate",
+    "db:push": "bun --filter=@doxynix/siem-server db:push",
+    "db:studio": "bun --filter=@doxynix/siem-server db:studio",
+    "db:migrate": "bun --filter=@doxynix/siem-server db:migrate",
+    "build": "turbo build",
+    "build:client": "turbo build --filter=@doxynix/siem-client",
+    "build:server": "turbo build --filter=@doxynix/siem-server",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint . --fix",
+    "type-check": "turbo type-check",
+    "test": "turbo test",
+    "postinstall": "turbo build --filter=@doxynix/siem-shared --filter=@doxynix/siem-server",
+    "format": "biome format . --write"
+  },
+  "keywords": [
+    "bun",
+    "hono",
+    "react",
+    "vite",
+    "monorepo",
+    "turbo"
+  ],
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.2",
+    "bun-types": "latest",
+    "concurrently": "^10.0.3",
+    "turbo": "^2.5.5"
+  },
+  "peerDependencies": {
+    "typescript": "^7.0.1-rc"
+  },
+  "dependencies": {
+    "@radix-ui/react-hover-card": "^1.1.18",
+    "@remixicon/react": "^4.9.0",
+    "clsx": "^2.1.1",
+    "hono": "^4.12.25",
+    "recharts": "^3.9.1",
+    "tailwind-merge": "^3.6.0",
+    "tailwind-variants": "^3.2.2"
+  }
 }
