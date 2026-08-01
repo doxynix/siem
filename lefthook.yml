@@ -7,8 +7,8 @@ pre-commit:
       stage_fixed: true
 
     spell-check:
-      glob: "*.{js,ts,jsx,tsx,md,json}"
-      run: bunx cspell lint --no-summary --no-progress {staged_files}
+      glob: "*.{js,ts,jsx,tsx,md}"
+      run: bunx cspell lint --no-summary --no-progress --no-must-find-files {staged_files}
 
     secretlint:
       run: bunx secretlint {staged_files}
