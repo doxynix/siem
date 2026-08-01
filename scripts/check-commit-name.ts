@@ -34,7 +34,7 @@ if (firstLine.endsWith(".")) {
 }
 
 const conventionalRegex =
-  /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9_.-]+\))?!?: .+/;
+  /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-zA-Z0-9_.-]+\))?!?: .+/;
 
 if (!conventionalRegex.test(firstLine)) {
   console.error("❌ Error: Commit message does not match the Conventional Commits specification!");
