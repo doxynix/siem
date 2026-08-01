@@ -1,0 +1,6 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": ["siem", "biome", "doxynix", "fsd", "secretlint", "lefthook", "bunx", "axiomhq"],
+  "ignorePaths": ["node_modules/**", ".git/**", "*.json", "package.json", "bun.lockb"]
+}
