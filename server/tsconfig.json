@@ -9,7 +9,6 @@
     "declaration": true,
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
-    "types": ["bun", "node"],
     "emitDecoratorMetadata": true
   },
   "include": ["src/**/*"],
