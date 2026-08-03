@@ -1,9 +1,15 @@
 node_modules/
+**/node_modules/**
 .bun/
+**/.bun/**
 .turbo/
+**/.turbo/**
 dist/
+**/dist/**
 build/
+**/build/**
 .cache/
+**/coverage/**
 
 *.log
 logs/
