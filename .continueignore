@@ -1,0 +1,14 @@
+node_modules/
+.bun/
+.turbo/
+dist/
+build/
+.cache/
+
+*.log
+logs/
+.DS_Store
+
+.env
+.env.*
+!.env.example
