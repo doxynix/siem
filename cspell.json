@@ -26,7 +26,8 @@
     "trgm",
     "ilike",
     "LOOKBACK",
-    "lookback"
+    "lookback",
+    "ipcountry"
   ],
   "ignorePaths": [
     "**/node_modules/**",
