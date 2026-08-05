@@ -1,23 +1,6 @@
-import { env } from "@server/core/env";
+import { redis } from "@server/core/redis";
+import { getIp } from "@server/utils/request-context";
 import type { MiddlewareHandler } from "hono";
-import Redis, { type Redis as RedisClient } from "ioredis";
-
-interface SIEMRedisClient extends RedisClient {
-  executeSlidingCounter(
-    currentKey: string,
-    previousKey: string,
-    maxRequests: string,
-    windowSec: string,
-    nowSec: string,
-  ): Promise<[number, number]>;
-}
-
-export const redis = new Redis(env.REDIS_URL, {
-  enableOfflineQueue: false,
-  maxRetriesPerRequest: 1,
-  connectTimeout: 2000,
-  commandTimeout: 1000,
-}) as SIEMRedisClient;
 
 redis.defineCommand("executeSlidingCounter", {
   numberOfKeys: 2,
@@ -66,11 +49,7 @@ export function createRateLimiter(config: RateLimitConfig = {}): MiddlewareHandl
   const prefix = config.prefix ?? "siem:ratelimit";
 
   return async (c, next) => {
-    const ip =
-      c.req.header("cf-connecting-ip") ??
-      c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ??
-      c.req.header("x-real-ip") ??
-      "anonymous";
+    const ip = getIp(c);
 
     const nowSec = Math.floor(Date.now() / 1000);
     const currentWindow = Math.floor(nowSec / windowSec);

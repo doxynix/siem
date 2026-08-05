@@ -22,7 +22,8 @@ try {
     process.exit(1);
   }
 } catch {
-  process.exit(0);
+  console.error("Branch check failed: unable to determine the current Git branch.");
+  process.exit(1);
 }
 
 process.exit(0);

@@ -2,40 +2,21 @@ import type { PaginatedResponse } from "@doxynix/siem-shared";
 import { db } from "@server/core/db/db";
 import { executePaginatedQuery } from "@server/core/db/pagination";
 import { type RuleSelect, rules } from "@server/core/db/schema";
-import { and, desc, eq, ilike, or, type SQL } from "drizzle-orm";
+import { combineConditions, eqIf, searchIf } from "@server/core/db/utils";
+import { desc, eq } from "drizzle-orm";
 import postgres from "postgres";
 import type { CreateRuleInput, GetRulesQuery, UpdateRuleInput } from "./rules.schema";
 
 export async function getRulesList(query: GetRulesQuery): Promise<PaginatedResponse<RuleSelect>> {
   const { page, limit, severity, isActive, search } = query;
 
-  const conditions: SQL[] = [];
-
-  if (severity != null) {
-    conditions.push(eq(rules.severity, severity));
-  }
-
-  if (isActive != null) {
-    conditions.push(eq(rules.isActive, isActive));
-  }
-
-  if (search != null && search.trim() !== "") {
-    const cleanSearch = `%${search.trim().replace(/[%_]/g, "\\$&")}%`;
-    const searchCondition = or(
-      ilike(rules.name, cleanSearch),
-      ilike(rules.description, cleanSearch),
-    );
-
-    if (searchCondition != null) {
-      conditions.push(searchCondition);
-    }
-  }
-
-  const whereClause: SQL | undefined = conditions.length > 0 ? and(...conditions) : undefined;
-
   return executePaginatedQuery({
     table: rules,
-    whereClause,
+    whereClause: combineConditions(
+      eqIf(rules.severity, severity),
+      eqIf(rules.isActive, isActive),
+      searchIf([rules.name, rules.description], search),
+    ),
     orderBy: [desc(rules.createdAt), desc(rules.id)],
     page,
     limit,

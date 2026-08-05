@@ -1,8 +1,9 @@
 import type { PaginatedResponse } from "@doxynix/siem-shared";
 import { db } from "@server/core/db/db";
 import { executePaginatedQuery } from "@server/core/db/pagination";
-import { type IncidentSelect, incidents } from "@server/core/db/schema";
-import { and, desc, eq, ilike, type SQL } from "drizzle-orm";
+import { type FindingSelect, type IncidentSelect, incidents } from "@server/core/db/schema";
+import { combineConditions, eqIf, ilikeIf } from "@server/core/db/utils";
+import { desc } from "drizzle-orm";
 import type { GetIncidentsQuery } from "./incidents.schema";
 
 export async function getIncidentsList(
@@ -10,29 +11,25 @@ export async function getIncidentsList(
 ): Promise<PaginatedResponse<IncidentSelect>> {
   const { page, limit, severity, fileName } = query;
 
-  const conditions: SQL[] = [];
-
-  if (severity != null) {
-    conditions.push(eq(incidents.severity, severity));
-  }
-
-  if (fileName != null && fileName.trim() !== "") {
-    const cleanFileName = `%${fileName.trim().replace(/[%_]/g, "\\$&")}%`;
-    conditions.push(ilike(incidents.fileName, cleanFileName));
-  }
-
-  const whereClause: SQL | undefined = conditions.length > 0 ? and(...conditions) : undefined;
-
   return executePaginatedQuery({
     table: incidents,
-    whereClause,
+    whereClause: combineConditions(
+      eqIf(incidents.severity, severity),
+      ilikeIf(incidents.fileName, fileName),
+    ),
     orderBy: [desc(incidents.createdAt), desc(incidents.id)],
     page,
     limit,
   });
 }
 
-export async function getIncidentById(id: string) {
+type GetIncidentByIdQuery =
+  | (IncidentSelect & {
+      findings: FindingSelect[];
+    })
+  | null;
+
+export async function getIncidentById(id: string): Promise<GetIncidentByIdQuery> {
   const incident = await db.query.incidents.findFirst({
     where: (table, { eq }) => eq(table.id, id),
     with: {
