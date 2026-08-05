@@ -23,7 +23,10 @@
     "datepicker",
     "glpat",
     "citext",
-    "trgm"
+    "trgm",
+    "ilike",
+    "LOOKBACK",
+    "lookback"
   ],
   "ignorePaths": [
     "**/node_modules/**",
