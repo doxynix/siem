@@ -13,7 +13,8 @@ export const env = createEnv({
       .string()
       .optional()
       .default("http://localhost:3000,https://localhost:3000")
-      .transform((val) => val.split(",").map((url) => url.trim().replace(/\/$/, ""))),
+      .transform((val) => val.split(",").map((url) => url.trim().replace(/\/$/, "")))
+      .pipe(z.array(z.url()).min(1)),
     NODE_ENV: z.enum(["production", "development", "test"]).default("development"),
   },
   runtimeEnv: process.env,

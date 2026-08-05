@@ -43,9 +43,7 @@ async function seedRules() {
   console.log("🌱 [Seed] Populating default SIEM scanning rules...");
 
   try {
-    for (const rule of defaultScanningRules) {
-      await db.insert(rules).values(rule).onConflictDoNothing({ target: rules.name });
-    }
+    await db.insert(rules).values(defaultScanningRules).onConflictDoNothing({ target: rules.name });
 
     console.log("✅ [Seed] Scanning rules seeded successfully!");
     process.exit(0);
